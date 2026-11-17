@@ -7,6 +7,7 @@ import { OverviewPage } from './pages/OverviewPage';
 import { BlockListPage } from './pages/BlockListPage';
 import { BlockDetailPage } from './pages/BlockDetailPage';
 import { TxDetailPage, TxListPage } from './pages/TxPages';
+import { AddressPage } from './pages/AddressPage';
 
 export default function App() {
   const caps = useCapabilities();
@@ -64,6 +65,7 @@ export default function App() {
           <Route path="/blocks/:height" element={<BlockDetailPage />} />
           <Route path="/txs" element={<TxListPage />} />
           <Route path="/txs/:hash" element={<TxDetailRoute />} />
+          <Route path="/addresses/:addr" element={<AddressRoute />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
@@ -93,6 +95,15 @@ function TxDetailRoute() {
   if (!hash) return <NotFound />;
 
   return <TxDetailPage hash={hash} />;
+}
+
+/** Route wrapper for /addresses/:addr — keeps AddressPage a pure prop-taking page. */
+function AddressRoute() {
+  const { addr } = useParams<{ addr: string }>();
+
+  if (!addr) return <NotFound />;
+
+  return <AddressPage addr={addr} />;
 }
 
 function NotFound() {

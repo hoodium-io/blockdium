@@ -134,6 +134,51 @@ export interface Capabilities {
   modules: Record<string, { enabled: boolean }>;
 }
 
+/** One ERC-20 transfer touching an address. */
+export interface AddressTransfer {
+  tx_hash: string;
+  height: number;
+  log_index: number;
+  /** The token CONTRACT that emitted the Transfer. */
+  token: string;
+  from: string;
+  to: string;
+  /** Base units as a decimal string — exact. */
+  amount: string;
+  /** Display form. Assumes 18 decimals, which is true for Hoodium's own tokens. */
+  amount_display: Amount;
+  direction: 'in' | 'out' | 'self';
+}
+
+/** One transaction touching an address. */
+export interface AddressTx {
+  hash: string;
+  height: number;
+  tx_index: number;
+  tx_type: 'evm' | 'cosmos';
+  status: number;
+  sender: string | null;
+  direction: 'in' | 'out' | 'self' | 'contract';
+}
+
+/**
+ * Address page header.
+ *
+ * `bech32` and `hex` are the same 20 bytes in two encodings, not two accounts.
+ * `kind` is derived: "contract" when code is deployed there or it emitted a log.
+ */
+export interface AddressSummary {
+  address: string;
+  bech32: string;
+  hex: string;
+  kind: 'eoa' | 'contract';
+  is_contract: boolean;
+  tx_count: number;
+  /** null when the address has never appeared — not 0, which would read as genesis. */
+  first_seen_height: number | null;
+  last_seen_height: number | null;
+}
+
 /** Shape of the API's error envelope. */
 export interface ApiErrorBody {
   error: { code: string; message: string };

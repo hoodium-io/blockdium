@@ -1,4 +1,7 @@
 import type {
+  AddressSummary,
+  AddressTransfer,
+  AddressTx,
   ApiErrorBody,
   Block,
   Capabilities,
@@ -100,6 +103,30 @@ export const api = {
 
   ponaBlock: (height: number, signal?: AbortSignal) =>
     get<PonaBlock>(`/api/v1/pona/blocks/${height}`, signal),
+
+  /** Accepts bech32 (rune1…) or 20-byte hex (0x…); both are the same 20 bytes. */
+  address: (addr: string, signal?: AbortSignal) =>
+    get<AddressSummary>(`/api/v1/addresses/${encodeURIComponent(addr)}`, signal),
+
+  addressTxs: (
+    addr: string,
+    params: { limit?: number; before_height?: number },
+    signal?: AbortSignal,
+  ) =>
+    get<{ txs: AddressTx[]; next_before_height: number | null }>(
+      `/api/v1/addresses/${encodeURIComponent(addr)}/txs${qs(params)}`,
+      signal,
+    ),
+
+  addressTransfers: (
+    addr: string,
+    params: { limit?: number; before_height?: number },
+    signal?: AbortSignal,
+  ) =>
+    get<{ transfers: AddressTransfer[]; next_before_height: number | null }>(
+      `/api/v1/addresses/${encodeURIComponent(addr)}/transfers${qs(params)}`,
+      signal,
+    ),
 
   ponaTier: (signal?: AbortSignal) => get<PonaTier>('/api/v1/pona/tier', signal),
 

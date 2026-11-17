@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useTx, useTxs } from '../hooks/queries';
 import { DASH, formatAmount, groupDigits, shortHash, statusLabel } from '../lib/format';
 import { StateGate } from '../components/StateGate';
+import { Pager } from '../components/Pager';
 
 export function TxListPage() {
-  const query = useTxs({ limit: 25 });
+  const [cursor, setCursor] = useState<number | undefined>(undefined);
+  const query = useTxs({ limit: 25, before_height: cursor });
 
   return (
     <section>
@@ -18,42 +21,56 @@ export function TxListPage() {
         emptyMessage="No transactions indexed yet."
       >
         {(d) => (
-          <table className="table">
-            <thead>
-              <tr>
-                <th scope="col">Hash</th>
-                <th scope="col">Type</th>
-                <th scope="col">Block</th>
-                <th scope="col">Status</th>
-                <th scope="col">Sender</th>
-                <th scope="col" className="num">
-                  Fee
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {d.txs.map((t) => (
-                <tr key={t.hash}>
-                  <td className="mono">
-                    <Link to={`/txs/${t.hash}`}>{shortHash(t.hash)}</Link>
-                  </td>
-                  <td>
-                    <span className={`pill pill--${t.tx_type}`}>{t.tx_type.toUpperCase()}</span>
-                  </td>
-                  <td>
-                    <Link to={`/blocks/${t.height}`}>{groupDigits(t.height)}</Link>
-                  </td>
-                  <td>
-                    <span className={`status status--${t.status === 1 ? 'ok' : 'fail'}`}>
-                      {statusLabel(t.status)}
-                    </span>
-                  </td>
-                  <td className="mono muted">{t.sender ? shortHash(t.sender, 12, 6) : DASH}</td>
-                  <td className="num">{formatAmount(t.fee)}</td>
+          <>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th scope="col">Hash</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Block</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Sender</th>
+                  <th scope="col" className="num">
+                    Fee
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {d.txs.map((t) => (
+                  <tr key={t.hash}>
+                    <td className="mono">
+                      <Link to={`/txs/${t.hash}`}>{shortHash(t.hash)}</Link>
+                    </td>
+                    <td>
+                      <span className={`pill pill--${t.tx_type}`}>{t.tx_type.toUpperCase()}</span>
+                    </td>
+                    <td>
+                      <Link to={`/blocks/${t.height}`}>{groupDigits(t.height)}</Link>
+                    </td>
+                    <td>
+                      <span className={`status status--${t.status === 1 ? 'ok' : 'fail'}`}>
+                        {statusLabel(t.status)}
+                      </span>
+                    </td>
+                    <td className="mono">
+                      {t.sender ? (
+                        <Link to={`/addresses/${t.sender}`}>{shortHash(t.sender, 12, 6)}</Link>
+                      ) : (
+                        <span className="muted">{DASH}</span>
+                      )}
+                    </td>
+                    <td className="num">{formatAmount(t.fee)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <Pager
+              nextCursor={d.next_before_height}
+              onCursor={setCursor}
+              atFirstPage={cursor === undefined}
+            />
+          </>
         )}
       </StateGate>
     </section>
@@ -99,16 +116,22 @@ export function TxDetailPage({ hash }: { hash: string }) {
               }
             />
             {t.error_message && <Row label="Error" value={t.error_message} />}
-            <Row label="Sender" value={t.sender ?? DASH} mono />
+            <Row
+              label="Sender"
+              value={
+                t.sender ? <Link to={`/addresses/${t.sender}`}>{t.sender}</Link> : DASH
+              }
+              mono
+            />
             <Row
               label="EVM from"
-              value={t.evm_from ?? DASH}
+              value={t.evm_from ? <Link to={`/addresses/${t.evm_from}`}>{t.evm_from}</Link> : DASH}
               hint={t.evm_from === null ? 'Not decoded: the event carries no sender' : undefined}
               mono
             />
             <Row
               label="EVM to"
-              value={t.evm_to ?? DASH}
+              value={t.evm_to ? <Link to={`/addresses/${t.evm_to}`}>{t.evm_to}</Link> : DASH}
               hint={t.evm_to === null ? 'Null on contract creation' : undefined}
               mono
             />

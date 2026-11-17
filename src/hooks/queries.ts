@@ -24,6 +24,10 @@ export const queryKeys = {
   ponaTier: ['pona', 'tier'] as const,
   ponaBands: (window: number) => ['pona', 'bands', window] as const,
   ponaPool: ['pona', 'pool'] as const,
+  address: (addr: string) => ['address', addr] as const,
+  addressTxs: (addr: string, before?: number) => ['address', addr, 'txs', before ?? null] as const,
+  addressTransfers: (addr: string, before?: number) =>
+    ['address', addr, 'transfers', before ?? null] as const,
 };
 
 export function useCapabilities() {
@@ -111,5 +115,35 @@ export function usePonaPool() {
     queryKey: queryKeys.ponaPool,
     queryFn: ({ signal }) => api.ponaPool(signal),
     refetchInterval: CONFIG_INTERVAL,
+  });
+}
+
+/** Address summary. `addr` may be bech32 or hex; both are the same 20 bytes. */
+export function useAddress(addr: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.address(addr ?? ''),
+    queryFn: ({ signal }) => api.address(addr as string, signal),
+    enabled: Boolean(addr),
+    refetchInterval: CHAIN_INTERVAL,
+  });
+}
+
+export function useAddressTxs(addr: string | undefined, before?: number) {
+  return useQuery({
+    queryKey: queryKeys.addressTxs(addr ?? '', before),
+    queryFn: ({ signal }) =>
+      api.addressTxs(addr as string, { limit: 25, before_height: before }, signal),
+    enabled: Boolean(addr),
+    refetchInterval: CHAIN_INTERVAL,
+  });
+}
+
+export function useAddressTransfers(addr: string | undefined, before?: number) {
+  return useQuery({
+    queryKey: queryKeys.addressTransfers(addr ?? '', before),
+    queryFn: ({ signal }) =>
+      api.addressTransfers(addr as string, { limit: 25, before_height: before }, signal),
+    enabled: Boolean(addr),
+    refetchInterval: CHAIN_INTERVAL,
   });
 }
