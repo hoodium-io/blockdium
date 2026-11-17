@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 
 import { useTx, useTxs } from '../hooks/queries';
-import { DASH, formatAmount, formatTime, groupDigits, shortHash, statusLabel } from '../lib/format';
+import { DASH, formatAmount, groupDigits, shortHash, statusLabel } from '../lib/format';
 import { StateGate } from '../components/StateGate';
 
 export function TxListPage() {

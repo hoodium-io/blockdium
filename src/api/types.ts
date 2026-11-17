@@ -134,10 +134,6 @@ export interface Capabilities {
   modules: Record<string, { enabled: boolean }>;
 }
 
-export interface Page<T, K extends string> {
-  next_before_height: number | null;
-} & Record<K, T[]>;
-
 /** Shape of the API's error envelope. */
 export interface ApiErrorBody {
   error: { code: string; message: string };
