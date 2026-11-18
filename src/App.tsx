@@ -1,8 +1,8 @@
 import { Link, NavLink, Route, Routes, useParams } from 'react-router-dom';
 
 import { useCapabilities } from './hooks/queries';
-import { groupDigits } from './lib/format';
 import { SearchBox } from './components/SearchBox';
+import { AddNetworkButton } from './components/AddNetworkButton';
 import { OverviewPage } from './pages/OverviewPage';
 import { BlockListPage } from './pages/BlockListPage';
 import { BlockDetailPage } from './pages/BlockDetailPage';
@@ -35,25 +35,20 @@ export default function App() {
         <SearchBox />
 
         <div className="stats">
-          {caps.data ? (
-            <>
-              {/* Network name, not the chain-id: an operator reading the header wants
-                  to know WHICH network, and rune_6592-1 means nothing at a glance. */}
-              <span className="netname" title={caps.data.chain.chain_id}>
-                Devnet
-              </span>
-              <span className="dot" aria-hidden="true">
-                ·
-              </span>
-              <span>
-                head <strong>{groupDigits(caps.data.indexer.last_indexed_height)}</strong>
-              </span>
-              {caps.data.indexer.lag_blocks > 5 && (
-                <span className="status status--fail">lagging {caps.data.indexer.lag_blocks}</span>
-              )}
-            </>
-          ) : (
-            <span className="muted">connecting…</span>
+          <AddNetworkButton />
+          <span className="dot" aria-hidden="true">
+            ·
+          </span>
+          {/*
+            Network name, not the chain-id: an operator reading the header wants to know
+            WHICH network, and rune_6592-1 means nothing at a glance. The technical id is
+            still available on hover.
+          */}
+          <span className="netname" title={caps.data ? caps.data.chain.chain_id : undefined}>
+            Devnet
+          </span>
+          {caps.data && caps.data.indexer.lag_blocks > 5 && (
+            <span className="status status--fail">lagging {caps.data.indexer.lag_blocks}</span>
           )}
         </div>
       </header>

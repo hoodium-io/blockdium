@@ -750,3 +750,84 @@ nav.pager {
   font-size: 11px;
   margin-left: auto;
 }
+
+/* ---------- add-network button ---------- */
+
+.addnet {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.addnet__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.addnet__btn:hover:not(:disabled) {
+  border-color: #e4761b;
+}
+
+.addnet__btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.addnet__msg {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 320px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.addnet__msg--ok {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.addnet__msg--warn {
+  border-color: var(--band-mid);
+  color: var(--band-mid);
+}
+
+.addnet__msg--error {
+  border-color: var(--fail);
+  color: var(--fail);
+}
+
+.addnet__close {
+  margin-left: auto;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.addnet__close:hover {
+  opacity: 1;
+}
