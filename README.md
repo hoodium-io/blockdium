@@ -38,6 +38,20 @@ Navigation and panels are driven by an `/api/v1/capabilities` module registry, s
 features that are not ready — oracle prices, a Yieldchain POX view, an ad server —
 appear as disabled roadmap entries rather than invented data.
 
+## Documentation
+
+Full documentation lives in [`docs/`](docs/README.md):
+
+| Document | Covers |
+|---|---|
+| [What is PoNA](docs/what-is-pona.md) | Why this explorer exists — the reward ladder and the `num_txs` trap |
+| [Architecture](docs/architecture.md) | Indexer, API, frontend and the watermark invariant |
+| [Data model](docs/data-model.md) | Tables, the pseudo-transaction rule, address encoding |
+| [API](docs/api.md) | The `/api/v1` contract |
+| [Running](docs/running.md) | Full-stack setup and troubleshooting |
+| [Adding a network](docs/adding-a-network.md) | The MetaMask button and its pitfalls |
+| [Limitations](docs/limitations.md) | What is not built, and what is unverified |
+
 ## Status
 
 Early development. Repositories and architecture are in place; the backend schema
