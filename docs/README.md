@@ -15,6 +15,7 @@ and explaining that is the product's whole reason to exist.
 | [running.md](running.md) | Getting it running locally |
 | [adding-a-network.md](adding-a-network.md) | The "Add Mainchain Devnet" MetaMask button |
 | [limitations.md](limitations.md) | What is deliberately not built, and what is unverified |
+| [../ROADMAP.md](../ROADMAP.md) | What is done, what is next, and why in that order |
 
 ## The short version
 

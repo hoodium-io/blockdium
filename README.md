@@ -38,6 +38,15 @@ Navigation and panels are driven by an `/api/v1/capabilities` module registry, s
 features that are not ready — oracle prices, a Yieldchain POX view, an ad server —
 appear as disabled roadmap entries rather than invented data.
 
+## Roadmap
+
+See **[ROADMAP.md](ROADMAP.md)** for what is done (with dates), what is next, and the
+known risks. New work is appended there.
+
+At a glance: indexer, API, and the block/transaction/address UI are working against live
+chain data. Balances, `evm_from`, contract-creation addresses and validator pages are not
+built yet.
+
 ## Documentation
 
 Full documentation lives in [`docs/`](docs/README.md):
@@ -54,14 +63,19 @@ Full documentation lives in [`docs/`](docs/README.md):
 
 ## Status
 
-Early development. Repositories and architecture are in place; the backend schema
-and API contract come first, then the UI is built against a live API rather than
-imagined responses.
-
+**Beta.** The explorer works end to end against the Hoodium Devnet — blocks,
+transactions and addresses render from a live index, and PoNA is shown per block. It is
+still under heavy development: see [ROADMAP.md](ROADMAP.md) for remaining work and
+[docs/limitations.md](docs/limitations.md) for what is unverified.
 ## Stack
 
-- Frontend: **Vite + React + TypeScript**
+- **Vite + React 19 + TypeScript**
+- **TanStack Query** for data fetching (one hook per endpoint, 6s refetch)
+- **React Router** for routing
 - Backend: Go indexer + REST API over Postgres (separate repository)
+
+No component library: the UI is a handful of tables and definition lists, and a
+dependency would cost more than it saves.
 
 ## Development
 
@@ -138,15 +152,6 @@ Two conventions from the API are load-bearing and are encoded in the types:
   survive a float.
 - **Unknown is `null`, never `0`.** A missing value renders as `—`, because a zero
   would be a claim rather than an absence.
-
-## Stack
-
-- **Vite + React 19 + TypeScript**
-- **TanStack Query** for data fetching (one hook per endpoint, 6s refetch)
-- **React Router** for routing
-
-No component library: the UI is a handful of tables and definition lists, and a
-dependency would cost more than it saves.
 
 ## Licence
 
