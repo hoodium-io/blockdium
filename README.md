@@ -67,6 +67,35 @@ npm run dev          # http://localhost:5173
 
 Point at a different API with `VITE_API_BASE_URL=http://host:8080 npm run dev`.
 
+### Environment
+
+Every value is optional — see [`.env.example`](.env.example). The two that matter:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `VITE_API_BASE_URL` | `http://127.0.0.1:8080` | Blockdium API base |
+| `VITE_EVM_RPC_URL` | `https://rpc.hoodium.dev` | EVM JSON-RPC written into MetaMask |
+
+`VITE_EVM_RPC_URL` is stored **permanently in the visitor's wallet** by the "Add
+Mainchain Devnet" button, so it must be publicly reachable. Overriding it with a
+loopback address gives every visitor a chain they cannot use.
+
+### Adding Devnet to MetaMask
+
+The header button calls `wallet_addEthereumChain` with the official Devnet parameters:
+
+```
+chainId       0x19c0   (6592)
+chainName     Hoodium Devnet
+symbol        RUNE     (18 decimals)
+rpcUrls       https://rpc.hoodium.dev
+```
+
+Every outcome is reported in the UI — added, already present, cancelled, no wallet
+detected, or an error — because a wallet button that silently does nothing is
+indistinguishable from a broken one.
+
+
 | Script | Purpose |
 |---|---|
 | `npm run dev` | Vite dev server on :5173 |

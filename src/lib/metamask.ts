@@ -46,18 +46,37 @@ export const DEVNET_SYMBOL = 'RUNE';
 export const DEVNET_DECIMALS = 18;
 
 /**
+ * Official public Devnet EVM JSON-RPC endpoint.
+ *
+ * Verified against the running chain before being used here — a wrong hostname in a
+ * wallet config is not something a user can recover from in MetaMask's UI:
+ *
+ *   - resolves to 51.38.98.62
+ *   - `eth_chainId` → 0x19c0 (6592), `net_version` → 6592
+ *   - block 69,400 hash `0x2ed7331…` is IDENTICAL to the local node's, so it is the
+ *     same chain and not a fork
+ *   - CORS allows `*` with POST, so a browser wallet can reach it
+ *
+ * Hosted behind nginx with TLS, so it is safe to store in a visitor's wallet.
+ */
+export const DEVNET_RPC_URL = 'https://rpc.hoodium.dev';
+
+/**
  * The EVM JSON-RPC endpoint MetaMask will use.
  *
- * Defaults to the local node because that is what exists today. Set
- * `VITE_EVM_RPC_URL` to a publicly reachable endpoint before deploying, or the added
- * network will not work for visitors.
+ * Defaults to the official public endpoint, NOT to the local node. MetaMask stores
+ * this URL permanently in the visitor's wallet, so a loopback address would add a
+ * chain that only works on the machine running the node.
+ *
+ * `VITE_EVM_RPC_URL` overrides it — useful for pointing a build at a private or
+ * local endpoint during development.
  */
 export function evmRpcUrl(): string {
   const configured = import.meta.env.VITE_EVM_RPC_URL as string | undefined;
 
   if (configured && configured.trim() !== '') return configured.trim();
 
-  return 'http://127.0.0.1:8545';
+  return DEVNET_RPC_URL;
 }
 
 /** The explorer URL MetaMask shows for "view on block explorer". */
