@@ -6,15 +6,13 @@
  *   - chain id `0x19c0` = 6592, confirmed by `eth_chainId` on the running node
  *   - symbol `RUNE`, 18 decimals — from `core/runetoken/runetoken.go`
  *     (`Symbol = "RUNE"`, and `types.BaseDenomUnit = 18`)
- *   - RPC URL is the EVM JSON-RPC endpoint MetaMask will talk to
+ *   - RPC URL is the official public Devnet endpoint, `https://rpc.hoodium.dev`
  *
- * # Why the RPC URL is configurable
+ * # Why the RPC URL is overridable
  *
- * MetaMask stores the RPC URL in the user's wallet and keeps using it. A loopback
- * address like `127.0.0.1:8545` only works on the machine running the node, so
- * defaulting to it would add a network that is dead for anyone else. The URL is
- * therefore taken from `VITE_EVM_RPC_URL` when set, and the button reports the URL it
- * is about to use instead of silently adding an unreachable one.
+ * MetaMask stores the RPC URL permanently in the visitor's wallet, so it must be an
+ * endpoint that works from any machine. `VITE_EVM_RPC_URL` exists only to point a
+ * local or private build elsewhere — the default is the public endpoint, never loopback.
  */
 
 /** Parameters MetaMask needs for `wallet_addEthereumChain`. */
