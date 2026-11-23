@@ -1,5 +1,7 @@
+import { Fragment } from 'react';
+
 import { useCapabilities, useBlocks, usePonaBands, usePonaTier } from '../hooks/queries';
-import { formatAmount, groupDigits } from '../lib/format';
+import { bandShortLabel, formatAmount, formatTxRange, groupDigits } from '../lib/format';
 import { StateGate } from '../components/StateGate';
 import { BandBar, LatestBlocks } from '../components/LatestBlocks';
 
@@ -60,17 +62,20 @@ export function OverviewPage() {
                 <p className="tierhead">
                   Tier {t.tier.tier_index + 1} · max {formatAmount(t.tier.max)}
                 </p>
+                {/*
+                  Rendered from tier.ladder rather than named fields: the ten bands and
+                  their ranges come resolved from the API, so this card cannot drift when
+                  the schedule changes or dPona shifts the thresholds.
+                */}
                 <dl className="facts facts--compact">
-                  <dt>Max band</dt>
-                  <dd>{formatAmount(t.tier.max)} · ≥{t.tier.max_tx_count_threshold} txs</dd>
-                  <dt>Mid band</dt>
-                  <dd>{formatAmount(t.tier.mid)} · ≥{t.tier.mid_tx_count_threshold} txs</dd>
-                  <dt>Low band</dt>
-                  <dd>{formatAmount(t.tier.low)} · ≥{t.tier.low_tx_count_threshold} txs</dd>
-                  <dt>Single band</dt>
-                  <dd>{formatAmount(t.tier.single)} · 1 tx</dd>
-                  <dt>Zero band</dt>
-                  <dd>{formatAmount(t.tier.zero)} · 0 txs</dd>
+                  {t.tier.ladder.map((row) => (
+                    <Fragment key={row.band}>
+                      <dt>{bandShortLabel(row.band)}</dt>
+                      <dd>
+                        {formatAmount(row.reward)} · {formatTxRange(row.min, row.max)}
+                      </dd>
+                    </Fragment>
+                  ))}
                   <dt>Next tier</dt>
                   <dd>
                     {t.next_tier_start_height === null

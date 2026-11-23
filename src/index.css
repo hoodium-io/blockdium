@@ -19,8 +19,13 @@
 
   --band-zero: #55636f;
   --band-single: #6b7f9e;
+  --band-duo: #6f89a8;
+  --band-trio: #7493b2;
+  --band-quart: #789ebc;
+  --band-quint: #7ca9c6;
   --band-low: #3d8b7d;
   --band-mid: #b8862b;
+  --band-high: #e08a2b;
   --band-max: #4cc2ff;
   --band-none: #444;
 
@@ -288,6 +293,35 @@ h3 {
   background: var(--band-single);
   color: #e6edf3;
 }
+
+/*
+ * The five exact-count bands (duo..quint) sit between `single` and `low` on the activity
+ * gradient: more active than one transaction, less than a genuinely used chain.
+ */
+.band--duo {
+  background: var(--band-duo);
+  color: #e6edf3;
+}
+
+.band--trio {
+  background: var(--band-trio);
+  color: #e6edf3;
+}
+
+.band--quart {
+  background: var(--band-quart);
+  color: #e6edf3;
+}
+
+.band--quint {
+  background: var(--band-quint);
+  color: #e6edf3;
+}
+
+.band--high {
+  background: var(--band-high);
+}
+
 
 .band--low {
   background: var(--band-low);
@@ -830,4 +864,63 @@ nav.pager {
 
 .addnet__close:hover {
   opacity: 1;
+}
+
+/* ---------- ten-band PoNA extras ---------- */
+
+/* Status badges in the panel header. */
+.pona__badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.pona__badge--fees {
+  border-color: var(--band-mid);
+  color: var(--band-mid);
+}
+
+.pona__badge--dpona {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/*
+ * Fee-funded explanation.
+ *
+ * Amber, not red: this is a normal economic state (the reserve ran dry; fees paid
+ * instead), and a 0 reward under it is expected for an empty block. Red would imply a
+ * fault.
+ */
+.pona__note {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+}
+
+.pona__note--fees {
+  border-color: var(--band-mid);
+  border-left-color: var(--band-mid);
+  background: rgba(184, 134, 43, 0.08);
+  color: var(--text);
+}
+
+.pona__zero-note {
+  font-size: 11px;
+  color: var(--band-mid);
+}
+
+.pona__footnote {
+  margin: 14px 0 0;
+  font-size: 11px;
 }

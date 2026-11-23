@@ -94,8 +94,13 @@ export function formatAge(iso: string | null | undefined): string {
 export function bandLabel(band: string): string {
   const map: Record<string, string> = {
     max: 'Max activity',
+    high: 'High activity',
     mid: 'Mid activity',
     low: 'Low activity',
+    quint: 'Quint',
+    quart: 'Quart',
+    trio: 'Trio',
+    duo: 'Duo',
     single: 'Single tx',
     zero: 'Zero activity',
     none: 'No tier',
@@ -105,13 +110,55 @@ export function bandLabel(band: string): string {
 }
 
 /**
+ * Compact label for the ten-band ladder, where the full name would not fit.
+ *
+ * The five exact-count bands are named for the COUNT they cover (quint = five, quart =
+ * four, trio = three, duo = two), which is why they read better short. Note that under
+ * dPona the bound shifts with `low`, so these names describe the band's position in the
+ * ladder rather than a fixed transaction count — the range column carries the truth.
+ */
+export function bandShortLabel(band: string): string {
+  const map: Record<string, string> = {
+    max: 'Max',
+    high: 'High',
+    mid: 'Mid',
+    low: 'Low',
+    quint: 'Quint',
+    quart: 'Quart',
+    trio: 'Trio',
+    duo: 'Duo',
+    single: 'Single',
+    zero: 'Zero',
+    none: 'none',
+  };
+
+  return map[band] ?? band;
+}
+
+/**
  * CSS class token for a band, so the colour scale lives in one place.
  *
  * The scale is deliberately ordered by activity, not by reward value: `zero` is the
- * floor and must look inert, `max` is a busy block and must look active.
+ * floor and must look inert, `max` is a busy block and must look active. The five new
+ * bands slot into that gradient between `low` and `single`.
  */
 export function bandClass(band: string): string {
   return `band band--${band}`;
+}
+
+/**
+ * Format a ladder row's transaction-count range from the API's resolved min/max.
+ *
+ * Never derive this from thresholds: under dPona they shift, and `single` is a genuine
+ * range. `${low}–${mid-1}` produced "5–5 txs" and shifted bounds — exactly the bug this
+ * replaces.
+ */
+export function formatTxRange(min: number, max: number | null): string {
+  if (max === null) return `≥ ${min} txs`;
+  if (min === max) return `${min} tx${min === 1 ? '' : 's'}`;
+  if (min === 0 && max === 0) return 'no txs';
+
+  return `${min}–${max} txs`;
 }
 
 /** Tx status: 1 = success, 0 = failed. */

@@ -59,19 +59,51 @@ export interface Tx {
   gas_used: number;
 }
 
+/** One rung of the ten-band ladder, with its RESOLVED count range from the API. */
+export interface BandRow {
+  band: string;
+  /** Inclusive lower bound of the transaction count. */
+  min: number;
+  /** Inclusive upper bound; `null` for the open-ended top band (max). */
+  max: number | null;
+  reward: Amount;
+  /** True for the band that actually applied to this block. */
+  is_paid: boolean;
+}
+
 export interface Tier {
   tier_index: number;
   start_height: number;
   ends_at_height: number;
   ends_at_height_meaning: 'exclusive' | 'open_ended';
+
+  /** The four stored thresholds. The five exact-count bands are derived from `low`. */
   low_tx_count_threshold: number;
   mid_tx_count_threshold: number;
+  high_tx_count_threshold: number;
   max_tx_count_threshold: number;
+
   max: Amount;
+  high: Amount;
   mid: Amount;
   low: Amount;
+  quint: Amount;
+  quart: Amount;
+  trio: Amount;
+  duo: Amount;
   single: Amount;
   zero: Amount;
+
+  /**
+   * All ten bands, busiest first, with exact ranges.
+   *
+   * ALWAYS render from this array rather than deriving ranges from the thresholds: under
+   * dPona every threshold shifts by the difficulty offset, so arithmetic labels
+   * (`${low}–${mid-1}`) become wrong, and `single` is a RANGE (1..low-5), not a point.
+   */
+  ladder: BandRow[];
+
+  floor_applied: boolean;
 }
 
 /** Full PoNA explanation for one block. */
@@ -86,6 +118,15 @@ export interface PonaBlock {
   denom: string;
   tier: Tier;
   band_explanation: string;
+
+  /** Dynamic difficulty active (equivalent to pona_diff > 0). */
+  dpona: boolean;
+  /** Difficulty in +10-transaction steps; 0 = off / base ladder. */
+  pona_diff: number;
+  /** Which pot paid: "reserve" | "fees" | "none" | null when the event did not say. */
+  funding_source: 'reserve' | 'fees' | 'none' | null;
+  /** Convenience: funding_source === "fees". */
+  fee_funded: boolean;
 }
 
 export interface PonaTier {
