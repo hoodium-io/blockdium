@@ -135,6 +135,17 @@ export interface PonaTier {
   next_tier_start_height: number | null;
   blocks_until_next_tier: number | null;
   note?: string;
+
+  /** Head-level dPona state, read from the most recent indexed block. */
+  dpona: boolean;
+  /** Difficulty in +10-transaction steps; 0 = off / base ladder. */
+  pona_diff: number;
+  /** Which pot paid the most recent block: reserve | fees | none | null. */
+  funding_source: 'reserve' | 'fees' | 'none' | null;
+  /** Convenience: funding_source === "fees". */
+  fee_funded: boolean;
+  /** The height these head-level values were read from. */
+  sample_height: number;
 }
 
 export interface BandBucket {
