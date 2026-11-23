@@ -194,7 +194,9 @@ code,
 
 .main {
   flex: 1;
-  padding: 24px;
+  /* 40px top: gives the page title clear separation from the two-row header without
+     needing a per-page margin. */
+  padding: 40px 24px 24px;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
@@ -1135,8 +1137,12 @@ nav.pager {
  */
 .drawer {
   position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
+  /*
+   * Anchored at 20% rather than dead-centre: on a short viewport a 50%-centred tab can
+   * collide with the footer, and the footer now carries real controls (social links, Back
+   * to Top). 20% keeps the tab in the upper content area on any viewport height.
+   */
+  top: 20%;
   z-index: 40;
   display: flex;
   align-items: stretch;
@@ -1389,7 +1395,7 @@ nav.pager {
  * above the band chart, and without the gap the input reads as part of that card.
  */
 .hero {
-  margin-bottom: 28px;
+  margin-bottom: 64px;
 }
 
 .hero h1 {
