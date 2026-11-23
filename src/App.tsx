@@ -1,7 +1,6 @@
 import { Link, NavLink, Route, Routes, useParams } from 'react-router-dom';
 
 import { useCapabilities } from './hooks/queries';
-import { groupDigits } from './lib/format';
 import { AddNetworkButton } from './components/AddNetworkButton';
 import { OverviewPage } from './pages/OverviewPage';
 import { BlockListPage } from './pages/BlockListPage';
@@ -201,3 +200,29 @@ function NotFound() {
     </div>
   );
 }
+
+/**
+ * Indexer health dot.
+ *
+ * Three states rather than two: "current" (lag 0), "settling" (1–5 blocks, normal during a
+ * burst of blocks) and "behind" (>5). Collapsing the middle band into green would hide a
+ * genuine stall; collapsing it into red would cry wolf on ordinary block-time jitter.
+ *
+ * The tooltip and `aria-label` carry the exact lag, because colour alone is not accessible
+ * and the whole point of a dot is that it says nothing on screen until you ask.
+ */
+function IndexerDot({ lag }: { lag: number }) {
+  const state = lag === 0 ? 'current' : lag > 5 ? 'behind' : 'settling';
+
+  const label =
+    lag === 0
+      ? 'Indexer is current with the chain head'
+      : `Indexer is ${lag} block${lag === 1 ? '' : 's'} behind the chain head`;
+
+  return (
+    <span className="ticker__item ticker__item--health" title={label}>
+      <span className={`healthdot healthdot--${state}`} role="img" aria-label={label} />
+    </span>
+  );
+}
+

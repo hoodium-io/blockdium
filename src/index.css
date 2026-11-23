@@ -1464,7 +1464,8 @@ nav.pager {
 .scopefilter__menu {
   position: absolute;
   top: calc(100% + 6px);
-  right: 0;
+  /* Left-aligned: the trigger now sits at the start of the search row. */
+  left: 0;
   z-index: 51;
   min-width: 160px;
   margin: 0;
@@ -1593,4 +1594,40 @@ nav.pager {
 
 .legal__intro {
   color: var(--text);
+}
+
+/* ---------- indexer health dot ---------- */
+
+.ticker__item--health {
+  display: inline-flex;
+  align-items: center;
+}
+
+/*
+ * 7px is deliberate: large enough to read at a glance in a 12px strip, small enough not to
+ * compete with the numbers beside it. The ring keeps it visible against the raised header
+ * background without needing a second colour.
+ */
+.healthdot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.healthdot--current {
+  background: var(--ok);
+  box-shadow: 0 0 0 2px rgba(63, 185, 80, 0.18);
+}
+
+/* Amber, not red: a few blocks behind is ordinary jitter, not a fault. */
+.healthdot--settling {
+  background: var(--band-mid);
+  box-shadow: 0 0 0 2px rgba(184, 134, 43, 0.18);
+}
+
+.healthdot--behind {
+  background: var(--fail);
+  box-shadow: 0 0 0 2px rgba(248, 81, 73, 0.2);
 }

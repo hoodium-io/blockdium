@@ -172,6 +172,14 @@ export function SearchBox() {
         }}
         role="search"
       >
+        {/*
+          Filters sit FIRST, before the input.
+          Reading order matters here: the scope narrows what the box accepts, so it reads as
+          a qualifier on the search rather than a modifier applied after the fact. It also
+          keeps the input and the submit button adjacent, since those two are used together.
+        */}
+        <ScopeFilter scope={scope} onChange={setScope} />
+
         <input
           type="search"
           className="search__input"
@@ -187,8 +195,6 @@ export function SearchBox() {
         <button type="submit" className="search__btn">
           Search
         </button>
-
-        <ScopeFilter scope={scope} onChange={setScope} />
       </form>
 
       {error && (
