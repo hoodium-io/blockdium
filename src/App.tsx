@@ -109,7 +109,18 @@ export default function App() {
                 {' '}
                 |{' '}
               </span>
-              <span className="footer__powered">Powered by Hoodium</span>
+              {/*
+                External link: `target="_blank"` with `rel="noopener noreferrer"` because an
+                untrusted destination must not get a handle on this window via window.opener.
+              */}
+              <a
+                className="footer__powered"
+                href="https://hoodium.io"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Powered by Hoodium
+              </a>
             </p>
             <span className="muted">
               The Hoodium block explorer, built around Proof of Network Activity — the reward a
@@ -118,13 +129,31 @@ export default function App() {
           </div>
 
           <div className="footer__meta">
-            <span>
-              Hoodium Devnet{' '}
-              <span className="mono" title="chain-id">
-                rune_6592-1
-              </span>
-            </span>
+            {/*
+              Chain id removed from the visible line: "Hoodium Devnet" is what a reader needs,
+              and rune_6592-1 is noise at a glance. It stays in the header's `title` (hover on
+              "Devnet") and in the Chain status drawer for anyone who needs the technical id.
+            */}
+            <span>Hoodium Devnet</span>
             <span className="muted">Hoodium-only. Not a general-purpose EVM explorer.</span>
+          </div>
+        </div>
+
+        {/* Row above the legal bar: social links left, Back to top right. */}
+        <div className="footer__bar">
+          <div className="footer__bar-inner">
+            <SocialLinks />
+
+            <button
+              type="button"
+              className="totop"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            >
+              Back to Top
+              <span className="totop__arrow" aria-hidden="true">
+                ↑
+              </span>
+            </button>
           </div>
         </div>
 
@@ -223,6 +252,54 @@ function IndexerDot({ lag }: { lag: number }) {
     <span className="ticker__item ticker__item--health" title={label}>
       <span className={`healthdot healthdot--${state}`} role="img" aria-label={label} />
     </span>
+  );
+}
+
+/**
+ * Social links.
+ *
+ * Placeholders on purpose: the real account URLs are not known to me, so `href="#"` with an
+ * explicit TODO keeps them obviously unfinished rather than pointing at a guessed handle.
+ * Each has an accessible name because the icon alone carries no text.
+ */
+function SocialLinks() {
+  const links = [
+    { key: 'x', label: 'X', title: 'X (Twitter) — TODO: real URL' },
+    { key: 'linkedin', label: 'LinkedIn', title: 'LinkedIn — TODO: real URL' },
+  ];
+
+  return (
+    <nav className="socials" aria-label="Social media">
+      {links.map((l) => (
+        <a
+          key={l.key}
+          className={`socials__link socials__link--${l.key}`}
+          href="#"
+          title={l.title}
+          aria-label={l.label}
+        >
+          {l.key === 'x' && <XIcon />}
+          {l.key === 'linkedin' && <LinkedInIcon />}
+        </a>
+      ))}
+    </nav>
+  );
+}
+
+/** Inline brand marks: external assets would 404 in a public repo. */
+function XIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.4 22H3.3l7.3-8.3L1.1 2h6.4l4.4 5.9L18.9 2zm-1.1 18h1.7L7.3 3.8H5.5L17.8 20z" />
+    </svg>
+  );
+}
+
+function LinkedInIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M4.98 3.5a2.5 2.5 0 11-.02 5 2.5 2.5 0 01.02-5zM3 9h4v12H3V9zm7 0h3.8v1.7h.05a4.2 4.2 0 013.75-2c4 0 4.4 2.5 4.4 5.8V21h-4v-5.6c0-1.3 0-3-1.9-3s-2.1 1.4-2.1 2.9V21h-4V9z" />
+    </svg>
   );
 }
 

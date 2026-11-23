@@ -167,7 +167,8 @@ function DPonaCard({
 }) {
   return (
     <div className="card card--compact card--narrow">
-      <h2>dPona</h2>
+      {/* `dPONA` exactly, so this heading overrides the card-h2 uppercase transform. */}
+      <h2 className="dpona__title">dPONA</h2>
 
       <StateGate isLoading={isLoading} error={error} data={data}>
         {(t) => (
@@ -180,7 +181,9 @@ function DPonaCard({
             </div>
 
             <div className="dpona__diff">
-              <span className="dpona__label">Pona diff</span>
+              <span className="dpona__label">
+                PONA <strong className="dpona__label-strong">Diff</strong>
+              </span>
               <span className={`dpona__value${t.pona_diff > 0 ? ' is-active' : ''}`}>
                 {groupDigits(t.pona_diff)}
               </span>
