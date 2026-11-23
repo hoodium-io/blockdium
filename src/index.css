@@ -57,8 +57,17 @@ a {
   text-decoration: none;
 }
 
+/*
+ * No underlines anywhere, including on hover.
+ *
+ * Links are distinguished by colour alone. That is a deliberate trade: the request was to
+ * remove every underline, and colour-plus-hover-brightness still signals interactivity
+ * clearly in this palette. `a:hover` previously added one, so it is removed here rather
+ * than overridden per component.
+ */
 a:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  filter: brightness(1.15);
 }
 
 code,
@@ -181,7 +190,8 @@ code,
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 8px;
+  /* 4px matches the nav's gap so the two clusters space identically. */
+  gap: 4px;
   font-size: 13px;
   color: var(--text-muted);
 }
@@ -828,8 +838,10 @@ h3 {
 /* The address being viewed, highlighted inside its own tables. */
 .is-self {
   font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  /* Was an underline; replaced with a tint so it stays distinguishable without any
+     underline anywhere in the UI. */
+  background: rgba(76, 194, 255, 0.12);
+  border-radius: 3px;
 }
 
 .dir {
@@ -1544,7 +1556,7 @@ nav.pager {
 
 .footer__powered:hover {
   color: var(--accent);
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 /* Copyright bar: separated from the descriptive block above. */
@@ -1723,4 +1735,55 @@ nav.pager {
 .dpona__label-strong {
   font-weight: 700;
   color: var(--text);
+}
+
+/* ---------- header right cluster + external links ---------- */
+
+.topbar__right {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+}
+
+/* Vertical rule separating the wallet button from the onward links. */
+.topbar__divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  flex: 0 0 auto;
+}
+
+.topbar__link {
+  /* Same setting as .nav a: 14px / 500, 6px 12px padding, hover background. These are peers
+     of Overview/Blocks/Transactions in the same header row, so anything less made them look
+     like secondary chrome. */
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.topbar__link:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+/* Join Now is the primary call to action, so it gets accent colour up front. */
+/*
+ * No accent variant: Join Now! is styled exactly like the nav items. It was briefly accent
+ * blue as a call to action, but in the same row as Overview/Blocks/Transactions that made it
+ * look like a different class of control.
+ */
+
+/* Inline links inside prose: inherit the surrounding colour so they do not shout. */
+.inline-link {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.inline-link:hover {
+  color: var(--accent);
 }

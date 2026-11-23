@@ -47,20 +47,19 @@ export default function App() {
               Gas: <strong>{gasLabel(caps.data)}</strong>
             </span>
             {/*
-              Indexer health as a DOT, not a number.
-
-              The previous "Lag: 0" was easy to miss because a healthy indexer produces the
-              least interesting possible value — zero — so the indicator only drew attention
-              when it was already too late. A coloured dot is glanceable in both states:
-              green means current, red means behind. The exact lag stays in the tooltip and
-              in the Chain status drawer, so no information is lost.
+              The indexer health dot lives beside "Devnet" on the right of this row, not here:
+              both answer the same question ("which chain, and is it current?"), so grouping
+              them keeps the left side purely prices/gas.
             */}
-            {caps.data && <IndexerDot lag={caps.data.indexer.lag_blocks} />}
           </div>
 
-          <span className="netname" title={caps.data ? caps.data.chain.chain_id : undefined}>
-            Devnet
-          </span>
+          <div className="topbar__right">
+            {/* Dot first: it qualifies the name that follows, reading as "current · Devnet". */}
+            {caps.data && <IndexerDot lag={caps.data.indexer.lag_blocks} />}
+            <span className="netname" title={caps.data ? caps.data.chain.chain_id : undefined}>
+              Devnet
+            </span>
+          </div>
         </div>
 
         {/* Main strip: identity, navigation, wallet. */}
@@ -81,6 +80,31 @@ export default function App() {
           </nav>
 
           <div className="stats">
+            {/*
+              Onward links sit to the LEFT of the wallet button, separated from it by a rule.
+              Grouping them here keeps the wallet action at the far edge, where it is the last
+              thing the eye reaches.
+            */}
+            <a
+              className="topbar__link"
+              href="https://join.hoodium.io"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Join Now!
+            </a>
+
+            <a
+              className="topbar__link"
+              href="https://faucet.hoodium.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Faucet
+            </a>
+
+            <span className="topbar__divider" aria-hidden="true" />
+
             <AddNetworkButton />
           </div>
         </div>
@@ -136,6 +160,13 @@ export default function App() {
             */}
             <span>Hoodium Devnet</span>
             <span className="muted">Hoodium-only. Not a general-purpose EVM explorer.</span>
+            <span className="muted">
+              Built by{' '}
+              <a className="inline-link" href="https://evorz.com" target="_blank" rel="noopener noreferrer">
+                Evorz Labs
+              </a>{' '}
+              &amp; the Hoodium Team
+            </span>
           </div>
         </div>
 
@@ -164,7 +195,11 @@ export default function App() {
         <div className="footer__legal">
           <div className="footer__legal-inner">
             <span className="muted">
-              © {new Date().getFullYear()} Hoodium Network. All rights reserved.
+              © {new Date().getFullYear()} Hoodium Network - by{' '}
+              <a className="inline-link" href="https://hoodinals.io" target="_blank" rel="noopener noreferrer">
+                Hoodinals
+              </a>
+              . All rights reserved.
             </span>
 
             <nav className="footer__links" aria-label="Legal">
