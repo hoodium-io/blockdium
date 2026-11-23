@@ -184,6 +184,11 @@ export interface Capabilities {
     txs_stored: number;
   };
   modules: Record<string, { enabled: boolean }>;
+  /** Gas readout for the header. Both fields are null when no fee has been indexed. */
+  gas: {
+    base_fee_arune: string | null;
+    base_fee_gwei: string | null;
+  };
 }
 
 /** One ERC-20 transfer touching an address. */

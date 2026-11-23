@@ -1,7 +1,6 @@
 import { Link, NavLink, Route, Routes, useParams } from 'react-router-dom';
 
 import { useCapabilities } from './hooks/queries';
-import { SearchBox } from './components/SearchBox';
 import { AddNetworkButton } from './components/AddNetworkButton';
 import { OverviewPage } from './pages/OverviewPage';
 import { BlockListPage } from './pages/BlockListPage';
@@ -9,47 +8,73 @@ import { BlockDetailPage } from './pages/BlockDetailPage';
 import { TxDetailPage, TxListPage } from './pages/TxPages';
 import { AddressPage } from './pages/AddressPage';
 
+/**
+ * Application shell.
+ *
+ * The header is TWO rows, both constrained to the same max-width as the body so their
+ * contents line up with the page edges rather than the viewport edges:
+ *
+ *   row 1 (top)    prices · gas on the left, network name on the right
+ *   row 2 (main)   brand + nav on the left, wallet button on the right
+ *
+ * The search box deliberately lives in the page hero instead of here: it is the primary
+ * action on the overview, and burying it in the chrome left it competing with navigation
+ * for space.
+ */
 export default function App() {
   const caps = useCapabilities();
 
   return (
     <div className="app">
       <header className="topbar">
-        <Link to="/" className="brand">
-          Block<span>dium</span>
-          {/* Development status. Deliberately small and unstyled-loud: it must be
-              readable but must not compete with the explorer's own data. */}
-          <sup className="beta" title="Under heavy development — data and layout may change">
-            beta
-          </sup>
-        </Link>
+        {/* Top strip: market/pricing placeholders and gas. */}
+        <div className="topbar__inner topbar__inner--top">
+          <div className="ticker">
+            <span className="ticker__item">
+              RUNE Price: <strong className="ticker__tba">TBA</strong>
+            </span>
+            <span className="ticker__sep" aria-hidden="true">
+              ·
+            </span>
+            <span className="ticker__item">
+              HOODI Price: <strong className="ticker__tba">TBA</strong>
+            </span>
+            <span className="ticker__sep" aria-hidden="true">
+              |
+            </span>
+            <span className="ticker__item" title="Base fee per gas from the latest indexed block">
+              Gas: <strong>{gasLabel(caps.data)}</strong>
+            </span>
+          </div>
 
-        <nav className="nav">
-          <NavLink to="/" end>
-            Overview
-          </NavLink>
-          <NavLink to="/blocks">Blocks</NavLink>
-          <NavLink to="/txs">Transactions</NavLink>
-        </nav>
-
-        <SearchBox />
-
-        <div className="stats">
-          <AddNetworkButton />
-          <span className="dot" aria-hidden="true">
-            ·
-          </span>
-          {/*
-            Network name, not the chain-id: an operator reading the header wants to know
-            WHICH network, and rune_6592-1 means nothing at a glance. The technical id is
-            still available on hover.
-          */}
           <span className="netname" title={caps.data ? caps.data.chain.chain_id : undefined}>
             Devnet
           </span>
-          {caps.data && caps.data.indexer.lag_blocks > 5 && (
-            <span className="status status--fail">lagging {caps.data.indexer.lag_blocks}</span>
-          )}
+        </div>
+
+        {/* Main strip: identity, navigation, wallet. */}
+        <div className="topbar__inner topbar__inner--main">
+          <Link to="/" className="brand">
+            Block<span>dium</span>
+            <sup className="beta" title="Under heavy development — data and layout may change">
+              beta
+            </sup>
+          </Link>
+
+          <nav className="nav">
+            <NavLink to="/" end>
+              Overview
+            </NavLink>
+            <NavLink to="/blocks">Blocks</NavLink>
+            <NavLink to="/txs">Transactions</NavLink>
+          </nav>
+
+          <div className="stats">
+            <AddNetworkButton />
+            {caps.data && caps.data.indexer.lag_blocks > 5 && (
+              <span className="status status--fail">lagging {caps.data.indexer.lag_blocks}</span>
+            )}
+          </div>
         </div>
       </header>
 
@@ -66,16 +91,45 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        <span>
-          Blockdium · Hoodium Devnet{' '}
-          <span className="mono" title="chain-id">
-            rune_6592-1
-          </span>
-        </span>
-        <span className="muted">Hoodium-only. Not a general-purpose EVM explorer.</span>
+        <div className="footer__inner">
+          <div className="footer__brand">
+            <strong>
+              Block<span className="brand-accent">dium</span>
+            </strong>
+            <span className="muted">
+              The Hoodium block explorer, built around Proof of Network Activity — the reward a
+              block earns depends on how many regular transactions it carried.
+            </span>
+          </div>
+
+          <div className="footer__meta">
+            <span>
+              Hoodium Devnet{' '}
+              <span className="mono" title="chain-id">
+                rune_6592-1
+              </span>
+            </span>
+            <span className="muted">Hoodium-only. Not a general-purpose EVM explorer.</span>
+          </div>
+        </div>
       </footer>
     </div>
   );
+}
+
+/**
+ * Gas figure for the header.
+ *
+ * Falls back to "—" rather than 0: no indexed fee is an absence of information, and 0 gwei
+ * would claim gas is free. Gwei is preferred over arune because 20 gwei is readable where
+ * 20000000000 is not; arune is on the tooltip for anyone who needs the exact value.
+ */
+function gasLabel(caps: ReturnType<typeof useCapabilities>['data']): string {
+  const gwei = caps?.gas?.base_fee_gwei;
+
+  if (!gwei) return '—';
+
+  return `${gwei} gwei`;
 }
 
 /**

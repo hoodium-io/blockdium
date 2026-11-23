@@ -6,6 +6,7 @@ import { bandShortLabel, formatAmount, formatTxRange, groupDigits } from '../lib
 import { StateGate } from '../components/StateGate';
 import { BandBar, LatestBlocks } from '../components/LatestBlocks';
 import { Drawer } from '../components/Drawer';
+import { SearchBox } from '../components/SearchBox';
 
 /**
  * Explorer home.
@@ -26,12 +27,16 @@ export function OverviewPage() {
 
   return (
     <section>
-      <header className="pagehead">
-        <h1>Blockdium</h1>
-        <p className="lede">
-          The Hoodium block explorer, built around Proof of Network Activity — the reward a
-          block earns depends on how many regular transactions it carried.
-        </p>
+      {/*
+        Hero: the page title and the primary action (search).
+        The descriptive paragraph moved to the footer, where it reads as context rather than
+        preamble — a returning visitor does not need the pitch on every load.
+      */}
+      <header className="hero">
+        <h1>The Hoodium Block Explorer</h1>
+        <div className="hero__search">
+          <SearchBox />
+        </div>
       </header>
 
       <div className="ponagrid">

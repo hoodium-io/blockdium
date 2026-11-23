@@ -77,15 +77,69 @@ code,
 
 .topbar {
   display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 12px 24px;
+  flex-direction: column;
   background: var(--bg-raised);
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 10;
 }
+
+/*
+ * Both header rows share the body's max-width and padding, so their edges line up with the
+ * page content rather than the viewport. Without this the top strip and the cards below
+ * would sit at different left margins and the whole page would look unaligned.
+ */
+.topbar__inner {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Thin market strip: prices and gas. */
+.topbar__inner--top {
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(34, 48, 63, 0.6);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.topbar__inner--main {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.ticker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.ticker__item strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* TBA is a placeholder, so it must not look like a real price. */
+.ticker__tba {
+  color: var(--text-muted);
+  font-style: italic;
+  font-weight: 600;
+}
+
+.ticker__sep {
+  opacity: 0.4;
+}
+
 
 .brand {
   font-size: 18px;
@@ -171,15 +225,54 @@ h3 {
 }
 
 .footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  padding: 16px 24px;
   border-top: 1px solid var(--border);
   color: var(--text-muted);
   font-size: 12px;
+  margin-top: 32px;
 }
+
+/* Same max-width and padding as the header rows and body, so all three align. */
+.footer__inner {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.footer__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 60ch;
+}
+
+.footer__brand strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.brand-accent {
+  color: var(--accent);
+}
+
+.footer__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .footer__meta {
+    text-align: left;
+  }
+}
+
 
 .muted {
   color: var(--text-muted);
@@ -1282,4 +1375,38 @@ nav.pager {
 .dpona__caption {
   font-size: 11px;
   color: var(--text-muted);
+}
+
+/* ---------- page hero ---------- */
+
+/*
+ * The hero holds the page title and the primary action.
+ *
+ * Spacing to the panels below is deliberately generous (28px): the search sits directly
+ * above the band chart, and without the gap the input reads as part of that card.
+ */
+.hero {
+  margin-bottom: 28px;
+}
+
+.hero h1 {
+  font-size: 26px;
+  margin: 0 0 14px;
+  letter-spacing: -0.02em;
+}
+
+/*
+ * The search box inside the hero.
+ *
+ * `max-width` keeps it readable on very wide screens: a full-width input above a 1400px
+ * page looks like a banner rather than a search field.
+ */
+.hero__search .search {
+  max-width: 560px;
+  flex: none;
+}
+
+.hero__search .search__error {
+  position: static;
+  margin-top: 8px;
 }
