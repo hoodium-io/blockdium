@@ -1410,3 +1410,187 @@ nav.pager {
   position: static;
   margin-top: 8px;
 }
+
+/* ---------- search scope filter ---------- */
+
+.scopefilter {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.scopefilter__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 100%;
+  padding: 6px 11px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.scopefilter__btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+/* An active filter must be visible at a glance, or the reader forgets it is on. */
+.scopefilter__btn.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.scopefilter__caret {
+  font-size: 9px;
+  opacity: 0.8;
+}
+
+/* Transparent full-screen layer that closes the menu on outside click. */
+.scopefilter__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: transparent;
+  border: 0;
+  cursor: default;
+}
+
+.scopefilter__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 51;
+  min-width: 160px;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
+}
+
+.scopefilter__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 7px 9px;
+  font-size: 12.5px;
+  font-family: inherit;
+  text-align: left;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.scopefilter__item:hover {
+  background: var(--bg-hover);
+}
+
+.scopefilter__item.is-selected {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.scopefilter__check {
+  font-size: 11px;
+}
+
+/* ---------- footer brand + legal ---------- */
+
+.footer__title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 2px;
+  margin: 0 0 2px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.footer__divider {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.footer__powered {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 15px;
+}
+
+/* Copyright bar: separated from the descriptive block above. */
+.footer__legal {
+  border-top: 1px solid var(--border);
+}
+
+.footer__legal-inner {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+
+.footer__links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer__links a {
+  color: var(--text-muted);
+}
+
+.footer__links a:hover {
+  color: var(--accent);
+}
+
+.footer__links-sep {
+  opacity: 0.4;
+}
+
+/* ---------- legal pages ---------- */
+
+.legal {
+  max-width: 76ch;
+}
+
+.legal h2 {
+  margin: 24px 0 6px;
+  font-size: 14px;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.legal p {
+  margin: 0 0 10px;
+  line-height: 1.6;
+}
+
+.legal__updated {
+  margin: 0 0 18px;
+  font-size: 12px;
+}
+
+.legal__intro {
+  color: var(--text);
+}
