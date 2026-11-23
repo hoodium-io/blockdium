@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 
-import type { Capabilities, PonaTier } from '../api/types';
+import type { Capabilities, PonaBands, PonaTier } from '../api/types';
 import { useCapabilities, useBlocks, usePonaBands, usePonaTier } from '../hooks/queries';
 import { bandShortLabel, formatAmount, formatTxRange, groupDigits } from '../lib/format';
 import { StateGate } from '../components/StateGate';
@@ -34,14 +34,10 @@ export function OverviewPage() {
         </p>
       </header>
 
-      <PonaToday
-        tierLoading={tier.isLoading}
-        tierError={tier.error}
-        tier={tier.data}
-        bandsLoading={bands.isLoading}
-        bandsError={bands.error}
-        bands={bands.data}
-      />
+      <div className="ponagrid">
+        <PonaBandsCard isLoading={bands.isLoading} error={bands.error} data={bands.data} />
+        <DPonaCard isLoading={tier.isLoading} error={tier.error} data={tier.data} />
+      </div>
 
       <LatestBlocks isLoading={blocks.isLoading} error={blocks.error} data={blocks.data} />
 
@@ -107,90 +103,91 @@ function ChainStatus({
 }
 
 /**
- * Band distribution together with the live dPona / funding state.
+/**
+ * Band distribution card.
  *
- * Placed together on purpose: the chart answers "what did the chain pay?", and dPona
- * answers "were the thresholds shifted when it paid that?". Reading only the chart would
- * leave a shifted ladder looking like a bug.
+ * Kept compact on purpose: it shares a row with the dPona card, so every extra line here
+ * steals width from that panel. The band bar carries the meaning; the header line gives
+ * the window it covers and nothing more.
  */
-function PonaToday({
-  tierLoading,
-  tierError,
-  tier,
-  bandsLoading,
-  bandsError,
-  bands,
+function PonaBandsCard({
+  isLoading,
+  error,
+  data,
 }: {
-  tierLoading: boolean;
-  tierError: unknown;
-  tier: PonaTier | undefined;
-  bandsLoading: boolean;
-  bandsError: unknown;
-  bands: import('../api/types').PonaBands | undefined;
+  isLoading: boolean;
+  error: unknown;
+  data: PonaBands | undefined;
 }) {
   return (
-    <div className="card">
-      <h2>PoNA · last 1,000 blocks</h2>
+    <div className="card card--compact">
+      <h2>PoNA band distribution</h2>
 
-      <StateGate isLoading={bandsLoading} error={bandsError} data={bands}>
+      <StateGate isLoading={isLoading} error={error} data={data}>
         {(b) => (
           <>
             <div className="bandhead">
               <span className="muted">
-                Heights {groupDigits(b.from_height)}–{groupDigits(b.to_height)} ·{' '}
-                {groupDigits(b.total_blocks)} blocks
+                {groupDigits(b.total_blocks)} blocks · heights {groupDigits(b.from_height)}–
+                {groupDigits(b.to_height)}
               </span>
             </div>
             <BandBar buckets={b.buckets} total={b.total_blocks} />
           </>
         )}
       </StateGate>
+    </div>
+  );
+}
 
-      <div className="pona-now">
-        <StateGate isLoading={tierLoading} error={tierError} data={tier}>
-          {(t) => (
-            <>
-              <NowFigure
-                label="dPona"
-                value={t.dpona ? 'On' : 'Off'}
-                tone={t.dpona ? 'accent' : undefined}
-                hint={
-                  t.dpona
-                    ? `difficulty active: +${t.pona_diff} step${t.pona_diff === 1 ? '' : 's'}`
-                    : 'base ladder, no offset'
-                }
-              />
-              <NowFigure
-                label="Pona diff"
-                value={groupDigits(t.pona_diff)}
-                tone={t.pona_diff > 0 ? 'accent' : undefined}
-                hint={
-                  t.pona_diff === 0
-                    ? 'no shift on any threshold'
-                    : `every threshold shifted +${t.pona_diff * 10} txs`
-                }
-              />
-              <NowFigure
-                label="Funding"
-                value={fundingLabel(t.funding_source)}
-                tone={t.fee_funded ? 'warn' : undefined}
-                hint={
-                  t.fee_funded
-                    ? 'reserve exhausted: fees pay the reward'
-                    : t.funding_source === 'none'
-                      ? 'nothing paid for this block'
-                      : 'paid from the pre-funded reserve'
-                }
-              />
-              <NowFigure
-                label="Sampled at"
-                value={groupDigits(t.sample_height)}
-                hint="height these values were read from"
-              />
-            </>
-          )}
-        </StateGate>
-      </div>
+/**
+ * dPona / difficulty card.
+ *
+ * Deliberately small and separate from the band chart: the chart answers "what did the
+ * chain pay?", and this answers "were the thresholds shifted when it paid that?" — a
+ * different question that a reader scans rather than reads.
+ *
+ * Funding source and the sampling height are intentionally NOT shown here. Funding is a
+ * per-block fact already surfaced on the block detail panel, and restating it at chain
+ * level implied it was a chain-wide setting; the sampling height was diagnostic noise.
+ */
+function DPonaCard({
+  isLoading,
+  error,
+  data,
+}: {
+  isLoading: boolean;
+  error: unknown;
+  data: PonaTier | undefined;
+}) {
+  return (
+    <div className="card card--compact card--narrow">
+      <h2>dPona</h2>
+
+      <StateGate isLoading={isLoading} error={error} data={data}>
+        {(t) => (
+          <div className="dpona">
+            <div className={`dpona__state${t.dpona ? ' is-active' : ''}`}>
+              <span className="dpona__pill">{t.dpona ? 'Active' : 'Off'}</span>
+              <span className="dpona__caption">
+                {t.dpona ? 'dynamic difficulty' : 'base ladder'}
+              </span>
+            </div>
+
+            <div className="dpona__diff">
+              <span className="dpona__label">Pona diff</span>
+              <span className={`dpona__value${t.pona_diff > 0 ? ' is-active' : ''}`}>
+                {groupDigits(t.pona_diff)}
+              </span>
+              <span className="dpona__caption">
+                {t.pona_diff === 0
+                  ? 'no threshold shift'
+                  : `+${groupDigits(t.pona_diff * 10)} txs on every threshold`}
+              </span>
+            </div>
+          </div>
+        )}
+      </StateGate>
     </div>
   );
 }
@@ -243,37 +240,4 @@ function LadderTable({ tier: t }: { tier: PonaTier }) {
   );
 }
 
-function NowFigure({
-  label,
-  value,
-  hint,
-  tone,
-}: {
-  label: string;
-  value: string;
-  hint?: string;
-  tone?: 'accent' | 'warn';
-}) {
-  const cls = ['now', tone ? `now--${tone}` : ''].filter(Boolean).join(' ');
 
-  return (
-    <div className={cls} title={hint}>
-      <span className="now__label">{label}</span>
-      <span className="now__value">{value}</span>
-      {hint && <span className="now__hint">{hint}</span>}
-    </div>
-  );
-}
-
-function fundingLabel(src: PonaTier['funding_source']): string {
-  switch (src) {
-    case 'reserve':
-      return 'Reward reserve';
-    case 'fees':
-      return 'Block fees';
-    case 'none':
-      return 'Nothing paid';
-    default:
-      return 'Unknown';
-  }
-}
