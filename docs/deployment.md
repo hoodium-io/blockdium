@@ -6,42 +6,86 @@ Checklist for deploying Blockdium. Ordered so that each step can be verified bef
 
 | # | Item | Why |
 |---|---|---|
-| 1 | **The API is not deployed anywhere.** | `api.hoodium.dev` and `blockdium.io` do not resolve. The frontend is useless without a reachable backend. |
-| 2 | **`/api/v1` needs a public host + reverse proxy.** | The backend binds `127.0.0.1:8080` by design (behind a proxy). That proxy does not exist yet. |
-| 3 | **SPA fallback rule.** | Routing is client-side. Without `try_files $uri /index.html`, a direct visit to `/blocks/123` returns 404. |
+| 1 | **The API is not deployed anywhere.** | `api.blockdium.io` does not resolve. The frontend is useless without a reachable backend. |
+| 2 | **The VPS needs a reverse proxy + TLS.** | The backend binds `127.0.0.1:8080` by design. Nothing public exists yet on that host. |
+| 3 | **SPA rewrite on the frontend host.** | Routing is client-side. Without a rewrite to `index.html`, a hard load of `/blocks/123` returns 404. |
+| 4 | **The VPS must reach a `runed` node.** | Verified against a local node here; the indexer needs `26657` (and `9090`/`8545` for EVM data) reachable from wherever it runs. |
 
 ## Deployment shape
 
-The frontend is a static bundle; the backend is a Go binary + Postgres. Same-origin is
-simplest and removes CORS entirely:
+Two hosts, one domain. The frontend is static (Vercel/Railway); the backend is a Go binary +
+Postgres on a VPS that sits beside a `runed` node.
 
 ```
-blockdium.io        → static dist/ (nginx, SPA fallback)
-blockdium.io/api/   → proxy_pass to 127.0.0.1:8080/api/
+                    blockdium.io            (Vercel / Railway — static)
+                         │
+                         │  /api/*  →  proxy
+                         ▼
+                    api.blockdium.io        (VPS: nginx → 127.0.0.1:8080)
+                         │
+                    blockdiumd serve  ──▶  Postgres (127.0.0.1:5432)
+                    blockdiumd index  ──▶  runed (127.0.0.1:26657, 9090, 8545)
 ```
 
-With that shape, leave `VITE_API_BASE_URL` **unset**. The production build then uses an
-empty base, so every request is same-origin. This is why `src/api/client.ts` has a
-dev/prod split: a production build must never fall back to `127.0.0.1:8080`.
+### Why the API needs a proxy subdomain, not a bare host
 
-If the API must live on its own host, set `VITE_API_BASE_URL=https://api.…` **and** add
-that origin to `BLOCKDIUM_CORS_ORIGINS` on the backend, or every request is blocked.
+The API must be reachable over **HTTPS** and it must be **CORS-correct**. Two options:
 
-## nginx (reference)
+| Option | Effect |
+|---|---|
+| **A. Proxy on the frontend host** (`blockdium.io/api/*` → VPS) | **No CORS at all** — same origin from the browser's view. Preferred. |
+| B. Direct `api.blockdium.io`, no proxy | Requires `BLOCKDIUM_CORS_ORIGINS=https://blockdium.io`, and the browser sees a cross-origin request. |
+
+**Prefer A.** Vercel and Railway both support a rewrite/proxy rule, so the browser only ever
+talks to `blockdium.io` and CORS becomes a non-issue.
+
+If you choose B, set on the VPS:
+
+```bash
+BLOCKDIUM_CORS_ORIGINS='https://blockdium.io' blockdiumd serve
+```
+
+and leave `VITE_API_BASE_URL` **unset** for A (same-origin), or set it to
+`https://api.blockdium.io` for B.
+
+## Frontend on Vercel
+
+```bash
+# Build settings
+Framework preset   Vite
+Build command      npm run build
+Output directory   dist
+Node version       20.x or newer
+```
+
+Server-side routing is client-side, so a rewrite is required or `/blocks/123` 404s on a hard
+load. `vercel.json`:
+
+```json
+{
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://api.blockdium.io/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
+```
+
+Order matters: the `/api` rule must come first, or the catch-all swallows it.
+
+## Frontend on Railway
+
+Railway can host the static bundle, but Vercel is a better fit for a static SPA (edge cache,
+rewrites, preview deploys). If using Railway anyway, serve `dist/` with a small static server
+that honours the same two rules — proxy `/api/*`, fall back to `index.html`. Do **not** use
+`serve -s` alone: it has no proxy rule, so `/api` returns the SPA shell and the app silently
+shows "Cannot reach the API".
+
+## nginx on the VPS (backend)
 
 ```nginx
 server {
-  server_name blockdium.io;
+  server_name api.blockdium.io;
 
-  root /var/www/blockdium;
-  index index.html;
-
-  # Client-side routes.
-  location / {
-    try_files $uri $uri/ /index.html;
-  }
-
-  # API proxy. The trailing slash on proxy_pass strips the extra segment.
   location /api/ {
     proxy_pass http://127.0.0.1:8080/api/;
     proxy_set_header Host $host;
@@ -49,29 +93,39 @@ server {
     proxy_set_header X-Forwarded-Proto $scheme;
   }
 
-  # Fingerprinted assets never change; index.html must not be cached.
-  location /assets/ {
-    expires 1y;
-    add_header Cache-Control "public, immutable";
-  }
-  location = /index.html {
-    add_header Cache-Control "no-cache";
-  }
+  # Nothing else is public on this host.
+  location / { return 404; }
 }
 ```
+
+TLS via `certbot --nginx -d api.blockdium.io`. The backend stays bound to `127.0.0.1:8080`
+and is reachable only through this proxy.
 
 ## Build and release
 
 ```bash
-# Backend (private repo)
-make install                       # builds ~/go/bin/blockdiumd with version + commit
-BLOCKDIUM_CORS_ORIGINS= make serve # empty allowlist is fine when same-origin
+# Backend (private repo, on the VPS)
+make install                          # ~/go/bin/blockdiumd, version + commit stamped
+BLOCKDIUM_DSN='postgres://…' make migrate
+BLOCKDIUM_DSN='postgres://…' make index     # supervisor-managed, not a shell
 
-# Frontend
+# Frontend (CI or a laptop — Vercel builds this automatically)
 npm ci
-npm run build                      # → dist/
-rsync -a --delete dist/ /var/www/blockdium/
+npm run build                         # → dist/
 ```
+
+Deploying the frontend: push to `main` and let Vercel build it, or `vercel --prod`. Do not
+rsync `dist/` to the VPS — it does not serve the frontend.
+
+Building the backend binary for the VPS from another machine:
+
+```bash
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make build   # bin/blockdiumd, static
+scp bin/blockdiumd vps:/usr/local/bin/
+```
+
+`CGO_ENABLED=0` matters here: the default build is dynamically linked and will fail on a VPS
+with a different glibc (`GLIBC_2.xx not found`).
 
 ## Before the first deploy
 
@@ -83,21 +137,28 @@ rsync -a --delete dist/ /var/www/blockdium/
       not silently serve stale data.
 - [ ] `indexed_from_height` surfaced in the UI so PoNA coverage is honest.
 
-## Domain placeholders to confirm
+## Domain and links — confirmed
 
-These are written into the code with a guessed domain and **must be verified**:
+| Where | Value | State |
+|---|---|---|
+| `index.html` canonical + `og:url` | `https://blockdium.io/` | ✅ set |
+| MetaMask block explorer URL | unset (`VITE_EXPLORER_URL`) | optional; omit rather than point at a 404 |
+| MetaMask RPC | `https://rpc.hoodium.dev` | ✅ verified working |
+| Social — X | `https://x.com/hoodiumio` | ✅ set |
+| Social — LinkedIn | `https://linkedin.com/company/hoodium` | ✅ set |
+| Hoodinals (copyright) | `https://hoodinals.io` | ✅ set |
+| Evorz Labs (footer) | `https://evorz.com` | ✅ set |
+| Join Now | `https://join.hoodium.io` | ✅ set |
+| Faucet | `https://faucet.hoodium.dev` | ✅ set |
 
-| Where | Current value |
-|---|---|
-| `index.html` canonical + `og:url` | `https://blockdium.io/` |
-| MetaMask block explorer URL | unset (`VITE_EXPLORER_URL`) |
-| MetaMask RPC | `https://rpc.hoodium.dev` — verified working |
+Nothing here is a placeholder. `VITE_EXPLORER_URL` is the only unset value, and leaving it
+unset is deliberate — the field is omitted from the MetaMask request rather than pointed at a
+domain that may not exist.
 
 ## Known gaps at launch
 
 - No balances, no `evm_from`, no contract-creation address, no validator pages.
 - No frontend tests; typecheck and build pass but nothing asserts rendering.
-- The Terms of Service and Privacy Policy pages are **outlines**, not legal documents.
-  Publishing a public financial-data site with placeholder terms is a decision to make
-  consciously, not by default.
-- Social links (X, LinkedIn) are `href="#"` placeholders.
+- The Terms of Service and Privacy Policy pages are **structural outlines** with a
+  "not yet published" notice. Accepted for a **devnet** launch; must be replaced with real
+  documents before any mainnet deployment.
