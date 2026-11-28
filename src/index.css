@@ -350,6 +350,19 @@ h3 {
   padding: 6px 8px;
 }
 
+/*
+ * Numeric columns must right-align in the HEADER too, not just the cells.
+ *
+ * `.table th` sets `text-align: left` at specificity (0,1,1), which beats a bare `.num`
+ * (0,1,0) — so "Entries / Reg. txs / Reward" sat left-aligned above right-aligned numbers
+ * and the column looked broken. This selector is scoped to the table header so the visual
+ * weight of the rule matches what it needs to override.
+ */
+.table th.num,
+.table td.num {
+  text-align: right;
+}
+
 .num {
   text-align: right;
   font-variant-numeric: tabular-nums;
