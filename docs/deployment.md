@@ -6,7 +6,7 @@ Checklist for deploying Blockdium. Ordered so that each step can be verified bef
 
 | # | Item | Why |
 |---|---|---|
-| 1 | **The API is not deployed anywhere.** | `api.hoodium.dev` and `explorer.hoodium.dev` do not resolve. The frontend is useless without a reachable backend. |
+| 1 | **The API is not deployed anywhere.** | `api.hoodium.dev` and `blockdium.io` do not resolve. The frontend is useless without a reachable backend. |
 | 2 | **`/api/v1` needs a public host + reverse proxy.** | The backend binds `127.0.0.1:8080` by design (behind a proxy). That proxy does not exist yet. |
 | 3 | **SPA fallback rule.** | Routing is client-side. Without `try_files $uri /index.html`, a direct visit to `/blocks/123` returns 404. |
 
@@ -16,8 +16,8 @@ The frontend is a static bundle; the backend is a Go binary + Postgres. Same-ori
 simplest and removes CORS entirely:
 
 ```
-explorer.hoodium.dev        → static dist/ (nginx, SPA fallback)
-explorer.hoodium.dev/api/   → proxy_pass to 127.0.0.1:8080/api/
+blockdium.io        → static dist/ (nginx, SPA fallback)
+blockdium.io/api/   → proxy_pass to 127.0.0.1:8080/api/
 ```
 
 With that shape, leave `VITE_API_BASE_URL` **unset**. The production build then uses an
@@ -31,7 +31,7 @@ that origin to `BLOCKDIUM_CORS_ORIGINS` on the backend, or every request is bloc
 
 ```nginx
 server {
-  server_name explorer.hoodium.dev;
+  server_name blockdium.io;
 
   root /var/www/blockdium;
   index index.html;
@@ -89,7 +89,7 @@ These are written into the code with a guessed domain and **must be verified**:
 
 | Where | Current value |
 |---|---|
-| `index.html` canonical + `og:url` | `https://explorer.hoodium.dev/` |
+| `index.html` canonical + `og:url` | `https://blockdium.io/` |
 | MetaMask block explorer URL | unset (`VITE_EXPLORER_URL`) |
 | MetaMask RPC | `https://rpc.hoodium.dev` — verified working |
 

@@ -86,7 +86,7 @@ export default function App() {
               thing the eye reaches.
             */}
             <a
-              className="topbar__link"
+              className="topbar__link topbar__link--focus"
               href="https://join.hoodium.io"
               target="_blank"
               rel="noopener noreferrer"
@@ -299,8 +299,18 @@ function IndexerDot({ lag }: { lag: number }) {
  */
 function SocialLinks() {
   const links = [
-    { key: 'x', label: 'X', title: 'X (Twitter) — TODO: real URL' },
-    { key: 'linkedin', label: 'LinkedIn', title: 'LinkedIn — TODO: real URL' },
+    {
+      key: 'x',
+      label: 'X',
+      title: 'Hoodium on X',
+      href: 'https://x.com/hoodiumio',
+    },
+    {
+      key: 'linkedin',
+      label: 'LinkedIn',
+      title: 'Hoodium on LinkedIn',
+      href: 'https://linkedin.com/company/hoodium',
+    },
   ];
 
   return (
@@ -309,9 +319,12 @@ function SocialLinks() {
         <a
           key={l.key}
           className={`socials__link socials__link--${l.key}`}
-          href="#"
+          href={l.href}
           title={l.title}
           aria-label={l.label}
+          /* External: noopener so the destination cannot reach back into this window. */
+          target="_blank"
+          rel="noopener noreferrer"
         >
           {l.key === 'x' && <XIcon />}
           {l.key === 'linkedin' && <LinkedInIcon />}

@@ -745,17 +745,28 @@ h3 {
 /* ---------- beta marker ---------- */
 
 .beta {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--bg);
   background: var(--band-mid);
   padding: 2px 6px;
   border-radius: 3px;
-  margin-left: 7px;
-  vertical-align: super;
+  margin-left: 8px;
+  /*
+   * Aligned to the CAP HEIGHT of the brand, not raised above it.
+   *
+   * `vertical-align: super` on an inline-flex child lifted the badge clear of the wordmark
+   * and made it look detached; `middle` centred on x-height, which sat too low against a
+   * 22px bold name. Aligning to the text baseline and nudging down by 4px puts it level with
+   * the capital B — where a status tag belongs.
+   */
+  vertical-align: baseline;
+  position: relative;
+  top: -4px;
   line-height: 1;
+  white-space: nowrap;
 }
 
 /* ---------- network name ---------- */
@@ -1799,4 +1810,21 @@ nav.pager {
 
 .inline-link:hover {
   color: var(--accent);
+}
+
+/*
+ * Focus link: blue text, everything else identical to the nav items.
+ *
+ * Colour is the only difference on purpose. Earlier this had accent colour AND its own
+ * weight, which made it read as a different class of control rather than a highlighted one.
+ * Keeping font-size, weight and padding in step means only the emphasis changes.
+ */
+.topbar__link--focus {
+  color: var(--accent);
+}
+
+.topbar__link--focus:hover {
+  background: var(--bg-hover);
+  color: var(--accent);
+  filter: brightness(1.2);
 }
