@@ -15,12 +15,23 @@ import type {
 /**
  * Base URL of the Blockdium API.
  *
- * Defaults to the local backend. Set `VITE_API_BASE_URL` to point elsewhere, e.g.
- * a staging deployment — the dev server proxies nothing, so this is a real
- * cross-origin call and the backend must allow the origin via
- * `BLOCKDIUM_CORS_ORIGINS`.
+ * Two different defaults, because the correct answer differs by build:
+ *
+ *   dev  → http://127.0.0.1:8080 (the local backend)
+ *   prod → same origin, with `/api` rewritten to `/api-proxy` by the reverse proxy
+ *
+ * A production build must never fall back to loopback: every visitor would get a page that
+ * cannot reach anything, and the failure looks like a broken explorer rather than a
+ * misconfiguration. If `VITE_API_BASE_URL` is unset in a production build, the empty string
+ * is used, which makes requests same-origin — a real 404/502 from the proxy, which is an
+ * honest failure an operator can diagnose.
+ *
+ * Set `VITE_API_BASE_URL` explicitly when the API lives on a different host; the backend
+ * then needs the origin in `BLOCKDIUM_CORS_ORIGINS`.
  */
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://127.0.0.1:8080';
+const API_BASE_URL: string = import.meta.env.PROD
+  ? ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '')
+  : ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://127.0.0.1:8080');
 
 /** Error carrying the backend's code so the UI can distinguish 404 from 500. */
 export class ApiError extends Error {
@@ -41,7 +52,7 @@ export class ApiError extends Error {
 }
 
 async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
     signal,
     headers: { Accept: 'application/json' },
   });
@@ -136,4 +147,4 @@ export const api = {
   ponaPool: (signal?: AbortSignal) => get<PonaPool>('/api/v1/pona/pool', signal),
 };
 
-export { BASE_URL };
+export { API_BASE_URL };
